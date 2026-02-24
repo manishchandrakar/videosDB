@@ -1,65 +1,57 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState } from 'react';
+import { useVideos, useSearchVideos } from '@/app/hooks/useVideos';
+import VideoGrid from '@/components/custom/VideoGrid';
+import SearchBar from '@/components/custom/SearchBar';
+import Pagination from '@/components/custom/Pagination';
+import useDebounce from '@/utils/utils';
+import { DEFAULT_LIMIT } from '@/constants';
+
+export default function HomePage() {
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const debouncedSearch = useDebounce(search, 400);
+
+  const isSearching = debouncedSearch.length > 0;
+
+  const { data: browsing, isLoading: browseLoading } = useVideos(
+    isSearching ? undefined : { page, limit: DEFAULT_LIMIT }
+  );
+
+  const { data: searchResult, isLoading: searchLoading } = useSearchVideos(debouncedSearch);
+
+  const data = isSearching ? searchResult : browsing;
+  const isLoading = isSearching ? searchLoading : browseLoading;
+
+  const handleSearch = (q: string) => {
+    setSearch(q);
+    setPage(1);
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Videos</h1>
+          {data && (
+            <p className="mt-0.5 text-sm text-zinc-500">
+              {data.total} video{data.total === 1 ? '' : 's'}
+            </p>
+          )}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+        <SearchBar onSearch={handleSearch} />
+      </div>
+
+      <VideoGrid
+        videos={data?.videos ?? []}
+        isLoading={isLoading}
+        emptyMessage={isSearching ? `No results for "${debouncedSearch}"` : 'No videos published yet.'}
+      />
+
+      {!isSearching && data && data.totalPages > 1 && (
+        <Pagination page={page} totalPages={data.totalPages} onPageChange={setPage} />
+      )}
     </div>
   );
 }

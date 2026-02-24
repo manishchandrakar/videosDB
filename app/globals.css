@@ -1,22 +1,42 @@
 @import "tailwindcss";
+@plugin '../hero.cjs';
+@source '../node_modules/@heroui/theme/dist/**/*.{js,mjs,jsx,tsx}';
 
+/* Enable Tailwind dark: variant via .dark class (Tailwind v4) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Light mode (default) */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #09090b;
+  --card: #f4f4f5;
+  --border: #d4d4d8;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  --input-bg: #f4f4f5;
+}
+
+/* Dark mode */
+.dark {
+  --background: #09090b;
+  --foreground: #f4f4f5;
+  --card: #18181b;
+  --border: #27272a;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  --input-bg: #27272a;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-input-bg: var(--input-bg);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {

@@ -1,0 +1,15 @@
+export enum DeviceTypeEnum {
+  MOBILE = 'MOBILE',
+  TABLET = 'TABLET',
+  DESKTOP = 'DESKTOP',
+}
+
+export enum ItemStatusEnum {
+  PENDING = 'PENDING',
+  CONFIRMED = 'CONFIRMED',
+  ARRIVED = 'ARRIVED',
+  ONGOING = 'ONGOING',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+  ON_HOLD = 'ON_HOLD',
+}
