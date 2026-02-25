@@ -9,6 +9,7 @@ interface VideoGridProps {
   onDelete?: (id: string) => void;
   onToggleStatus?: (id: string) => void;
   emptyMessage?: string;
+  userMap?: Record<string, string>;
 }
 
 export default function VideoGrid({
@@ -18,6 +19,7 @@ export default function VideoGrid({
   onDelete,
   onToggleStatus,
   emptyMessage = 'No videos found.',
+  userMap,
 }: VideoGridProps) {
   if (isLoading) {
     return (
@@ -48,6 +50,7 @@ export default function VideoGrid({
           showStatus={showStatus}
           onDelete={onDelete}
           onToggleStatus={onToggleStatus}
+          uploaderName={userMap ? (userMap[video.uploadedBy] ?? 'Unknown') : undefined}
         />
       ))}
     </div>

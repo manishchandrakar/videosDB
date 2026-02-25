@@ -2,12 +2,14 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Video, PublishStatus } from '@/types';
 import Badge from '@/components/common/Badge';
+import { getMediaPath } from '@/utils/mediaUtils';
 
 interface VideoCardProps {
   video: Video;
   showStatus?: boolean;
   onDelete?: (id: string) => void;
   onToggleStatus?: (id: string) => void;
+  uploaderName?: string;
 }
 
 function formatViews(views: number): string {
@@ -29,6 +31,7 @@ export default function VideoCard({
   showStatus = false,
   onDelete,
   onToggleStatus,
+  uploaderName,
 }: VideoCardProps) {
   return (
     <div className="group flex flex-col rounded-xl bg-card border border-border overflow-hidden hover:border-muted-foreground transition-colors">
@@ -36,7 +39,7 @@ export default function VideoCard({
       <Link href={`/videos/${video.slug}`} className="relative block aspect-video bg-muted">
         {video.thumbnailUrl ? (
           <Image
-            src={video.thumbnailUrl}
+            src={getMediaPath(video.thumbnailUrl)}
             alt={video.title}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
@@ -72,6 +75,16 @@ export default function VideoCard({
           <span>·</span>
           <span>{formatDate(video.createdAt)}</span>
         </div>
+
+        {uploaderName && (
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <svg className="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <span className="truncate">{uploaderName}</span>
+          </div>
+        )}
 
         {/* Tags */}
         {video.tags.length > 0 && (

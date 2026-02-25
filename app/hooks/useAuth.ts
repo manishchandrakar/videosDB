@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { authService } from '@/services/authService';
-import { ChangePasswordInput, LoginInput, RegisterInput } from '@/types';
+import { ChangePasswordInput, LoginInput, RegisterInput, SignupInput } from '@/types';
 import { QUERY_KEYS } from '@/constants';
 import { useAuth as useAuthContext } from '@/app/context/AuthContext';
 
@@ -27,6 +27,13 @@ export function useLogin() {
   });
 }
 
+export function useSignup() {
+  const { signup } = useAuthContext();
+  return useMutation({
+    mutationFn: (input: SignupInput) => signup(input),
+  });
+}
+
 export function useLogout() {
   const { logout } = useAuthContext();
   return useMutation({
@@ -42,10 +49,11 @@ export function useChangePassword() {
   });
 }
 
-export function useUsers() {
+export function useUsers(enabled = true) {
   return useQuery({
     queryKey: QUERY_KEYS.USERS,
     queryFn: authService.getUsers,
+    enabled,
   });
 }
 

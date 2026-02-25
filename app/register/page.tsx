@@ -4,28 +4,28 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useLogin } from '@/app/hooks/useAuth';
+import { useSignup } from '@/app/hooks/useAuth';
 import Input from '@/components/common/Input';
 import Button from '@/components/common/Button';
-import { loginSchema, LoginFormData } from '@/lib/schemas';
+import { registerSchema, RegisterFormData } from '@/lib/schemas';
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
-  const { mutateAsync: login, isPending, error } = useLogin();
+  const { mutateAsync: signup, isPending, error } = useSignup();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
     mode: 'onTouched',
     delayError: 300,
   });
 
-  const onSubmit = async (data: LoginFormData) => {
+  const onSubmit = async (data: RegisterFormData) => {
     try {
-      await login(data);
+      await signup({ username: data.username, email: data.email, password: data.password });
       router.push('/');
     } catch {
       // error shown via apiError below
@@ -33,7 +33,8 @@ export default function LoginPage() {
   };
 
   const apiError = error
-    ? (error as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Login failed'
+    ? (error as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+      'Registration failed'
     : null;
 
   return (
@@ -44,16 +45,24 @@ export default function LoginPage() {
           <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
             <svg className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                d="M15 10l4.553-2.276A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
+                d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Welcome to VideoHub</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Sign in to watch and explore videos</p>
+          <h1 className="text-2xl font-bold text-foreground">Create an account</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Join VideoHub to start watching</p>
         </div>
 
         {/* Card */}
         <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
+            <Input
+              label="Username"
+              type="text"
+              placeholder="your_username"
+              error={errors.username?.message}
+              autoComplete="username"
+              {...register('username')}
+            />
             <Input
               label="Email"
               type="email"
@@ -67,8 +76,16 @@ export default function LoginPage() {
               type="password"
               placeholder="••••••••"
               error={errors.password?.message}
-              autoComplete="current-password"
+              autoComplete="new-password"
               {...register('password')}
+            />
+            <Input
+              label="Confirm password"
+              type="password"
+              placeholder="••••••••"
+              error={errors.confirmPassword?.message}
+              autoComplete="new-password"
+              {...register('confirmPassword')}
             />
 
             {apiError && (
@@ -78,23 +95,15 @@ export default function LoginPage() {
             )}
 
             <Button type="submit" loading={isPending} className="w-full mt-1">
-              Sign in
+              Create account
             </Button>
           </form>
         </div>
 
         <p className="mt-4 text-center text-xs text-muted-foreground">
-          Don&apos;t have an account?{' '}
-          <Link href="/register" className="text-primary hover:underline font-medium">
-            Create one
-          </Link>
-        </p>
-
-        {/* Admin link */}
-        <p className="mt-2 text-center text-xs text-muted-foreground">
-          Admin?{' '}
-          <Link href="/login/admin" className="text-primary hover:underline font-medium">
-            Sign in to the admin portal
+          Already have an account?{' '}
+          <Link href="/login" className="text-primary hover:underline font-medium">
+            Sign in
           </Link>
         </p>
       </div>

@@ -9,7 +9,6 @@ import { UserRole, UserPublic } from '@/types';
 import Input from '@/components/common/Input';
 import Button from '@/components/common/Button';
 import Badge from '@/components/common/Badge';
-import Modal from '@/components/common/Modal';
 import Spinner from '@/components/common/Spinner';
 
 // ─── Zod schema ───────────────────────────────────────────────────────────────
@@ -25,14 +24,13 @@ const createUserSchema = z.object({
     .min(8, 'Password must be at least 8 characters')
     .regex(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/,
-      'Password must include uppercase, lowercase, number and special character'
+      'Must include uppercase, lowercase, number and special character'
     ),
   role: z.enum([UserRole.SUPER_ADMIN, UserRole.MINI_ADMIN]),
 });
 
 type CreateUserForm = z.infer<typeof createUserSchema>;
 
-// ─── Role helpers ─────────────────────────────────────────────────────────────
 type FilterTab = 'all' | UserRole.SUPER_ADMIN | UserRole.MINI_ADMIN;
 
 const roleBadgeVariant = (role: UserRole) =>
@@ -41,10 +39,9 @@ const roleBadgeVariant = (role: UserRole) =>
 const roleLabel = (role: UserRole) =>
   role === UserRole.SUPER_ADMIN ? 'Super Admin' : 'Mini Admin';
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
 export default function UsersPage() {
   const { data: users = [], isLoading } = useUsers();
-  const { mutate: createUser, isPending: isCreating, error: createError } = useCreateUser();
+  const { mutate: createUser, isPending: isCreating, error: createError, reset: resetMutation } = useCreateUser();
   const { mutate: deleteUser, isPending: isDeleting } = useDeleteUser();
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -65,17 +62,26 @@ export default function UsersPage() {
 
   const selectedRole = watch('role');
 
+  const openModal = () => {
+    reset();
+    resetMutation();
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    reset();
+    resetMutation();
+  };
+
   const onSubmit = (data: CreateUserForm) => {
     createUser(data, {
-      onSuccess: () => {
-        reset();
-        setModalOpen(false);
-      },
+      onSuccess: closeModal,
     });
   };
 
   const handleDelete = (user: UserPublic) => {
-    if (!confirm(`Delete user "${user.username}"? This cannot be undone.`)) return;
+    if (!confirm(`Delete "${user.username}"? This cannot be undone.`)) return;
     setDeletingId(user.id);
     deleteUser(user.id, { onSettled: () => setDeletingId(null) });
   };
@@ -88,11 +94,10 @@ export default function UsersPage() {
     [UserRole.MINI_ADMIN]: users.filter((u) => u.role === UserRole.MINI_ADMIN).length,
   };
 
-  const apiError =
-    createError
-      ? (createError as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message ?? 'Failed to create user'
-      : null;
+  const apiError = createError
+    ? (createError as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+      'Failed to create user'
+    : null;
 
   const TABS: { key: FilterTab; label: string }[] = [
     { key: 'all', label: `All (${counts.all})` },
@@ -110,7 +115,7 @@ export default function UsersPage() {
             Manage admin and mini-admin accounts
           </p>
         </div>
-        <Button onClick={() => setModalOpen(true)}>+ Add User</Button>
+        <Button onClick={openModal}>+ Add User</Button>
       </div>
 
       {/* Filter tabs */}
@@ -197,83 +202,100 @@ export default function UsersPage() {
         </div>
       )}
 
-      {/* Add User Modal */}
-      <Modal
-        isOpen={modalOpen}
-        onClose={() => { setModalOpen(false); reset(); }}
-        title="Add New User"
-        size="md"
-        footer={
-          <div className="flex gap-3 w-full justify-end">
-            <Button variant="ghost" onClick={() => { setModalOpen(false); reset(); }}>
-              Cancel
-            </Button>
-            <Button type="submit" form="create-user-form" loading={isCreating}>
-              Create User
-            </Button>
-          </div>
-        }
-      >
-        <form
-          id="create-user-form"
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col gap-4"
-        >
-          <Input
-            label="Username"
-            placeholder="john_doe"
-            error={errors.username?.message}
-            {...register('username')}
-          />
-          <Input
-            label="Email"
-            type="email"
-            placeholder="john@example.com"
-            error={errors.email?.message}
-            {...register('email')}
-          />
-          <Input
-            label="Password"
-            type="password"
-            placeholder="Min 8 chars, uppercase, number, special char"
-            error={errors.password?.message}
-            {...register('password')}
+      {/* ── Custom Add User Modal ──────────────────────────────────────────── */}
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={closeModal}
           />
 
-          {/* Role selector */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-foreground">Role</label>
-            <div className="flex gap-2">
-              {([UserRole.MINI_ADMIN, UserRole.SUPER_ADMIN] as const).map((r) => (
-                <button
-                  key={r}
-                  type="button"
-                  onClick={() => setValue('role', r, { shouldValidate: true })}
-                  className={[
-                    'flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors',
-                    selectedRole === r
-                      ? r === UserRole.SUPER_ADMIN
-                        ? 'border-blue-500 bg-blue-600/20 text-blue-400'
-                        : 'border-zinc-500 bg-zinc-600/20 text-zinc-300'
-                      : 'border-border bg-muted text-muted-foreground hover:border-muted-foreground',
-                  ].join(' ')}
-                >
-                  {r === UserRole.SUPER_ADMIN ? 'Super Admin' : 'Mini Admin'}
-                </button>
-              ))}
+          {/* Panel */}
+          <div className="relative z-10 w-full max-w-md rounded-2xl border border-border bg-card shadow-2xl">
+            {/* Modal header */}
+            <div className="flex items-center justify-between border-b border-border px-6 py-4">
+              <h2 className="text-base font-semibold text-foreground">Add New User</h2>
+              <button
+                onClick={closeModal}
+                className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-            {errors.role && (
-              <p className="text-xs text-red-400">{errors.role.message}</p>
-            )}
-          </div>
 
-          {apiError && (
-            <p className="rounded-lg border border-red-800 bg-red-900/30 px-3 py-2 text-sm text-red-400">
-              {apiError}
-            </p>
-          )}
-        </form>
-      </Modal>
+            {/* Form */}
+            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 p-6">
+              <Input
+                label="Username"
+                placeholder="john_doe"
+                error={errors.username?.message}
+                {...register('username')}
+              />
+              <Input
+                label="Email"
+                type="email"
+                placeholder="john@example.com"
+                error={errors.email?.message}
+                {...register('email')}
+              />
+              <Input
+                label="Password"
+                type="password"
+                placeholder="Min 8 chars, uppercase, number, special char"
+                error={errors.password?.message}
+                {...register('password')}
+              />
+
+              {/* Role selector */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium text-foreground">Role</label>
+                <div className="flex gap-2">
+                  {([UserRole.MINI_ADMIN, UserRole.SUPER_ADMIN] as const).map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => setValue('role', r, { shouldValidate: true })}
+                      className={[
+                        'flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors',
+                        selectedRole === r
+                          ? r === UserRole.SUPER_ADMIN
+                            ? 'border-blue-500 bg-blue-600/20 text-blue-400'
+                            : 'border-zinc-500 bg-zinc-700 text-zinc-200'
+                          : 'border-border bg-muted text-muted-foreground hover:border-muted-foreground',
+                      ].join(' ')}
+                    >
+                      {r === UserRole.SUPER_ADMIN ? 'Super Admin' : 'Mini Admin'}
+                    </button>
+                  ))}
+                </div>
+                {errors.role && (
+                  <p className="text-xs text-red-400">{errors.role.message}</p>
+                )}
+              </div>
+
+              {/* API error */}
+              {apiError && (
+                <p className="rounded-lg border border-red-800 bg-red-900/30 px-3 py-2 text-sm text-red-400">
+                  {apiError}
+                </p>
+              )}
+
+              {/* Footer buttons */}
+              <div className="flex gap-3 justify-end pt-2 border-t border-border mt-2">
+                <Button type="button" variant="ghost" onClick={closeModal}>
+                  Cancel
+                </Button>
+                <Button type="submit" loading={isCreating}>
+                  Create User
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

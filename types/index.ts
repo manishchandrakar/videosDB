@@ -121,3 +121,9 @@ export interface RegisterInput {
   password: string;
   role?: UserRole.SUPER_ADMIN | UserRole.MINI_ADMIN;
 }
+
+export interface SignupInput {
+  username: string;
+  email: string;
+  password: string;
+}

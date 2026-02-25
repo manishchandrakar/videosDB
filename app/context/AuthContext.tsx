@@ -9,7 +9,7 @@ import {
   ReactNode,
 } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { AuthUser, LoginInput, LoginResponse } from '@/types';
+import { AuthUser, LoginInput, LoginResponse, SignupInput } from '@/types';
 import { authService } from '@/services/authService';
 import {
   storeTokens,
@@ -23,6 +23,7 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (credentials: LoginInput) => Promise<LoginResponse>;
+  signup: (input: SignupInput) => Promise<LoginResponse>;
   logout: () => void;
 }
 
@@ -53,6 +54,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return result;
   }, []);
 
+  const signup = useCallback(async (input: SignupInput): Promise<LoginResponse> => {
+    const result = await authService.signup(input);
+    storeTokens(result.tokens);
+    const decoded = decodeToken(result.tokens.accessToken) as AuthUser | null;
+    setUser(decoded ?? { ...result.user, userId: result.user.id });
+    return result;
+  }, []);
+
   const logout = useCallback(() => {
     clearStoredTokens();
     setUser(null);
@@ -66,6 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!user,
         isLoading,
         login,
+        signup,
         logout,
       }}
     >

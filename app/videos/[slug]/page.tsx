@@ -6,6 +6,7 @@ import VideoGrid from '@/components/custom/VideoGrid';
 import Badge from '@/components/common/Badge';
 import Spinner from '@/components/common/Spinner';
 import { PublishStatus } from '@/types';
+import { getMediaPath } from '@/utils/mediaUtils';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -46,10 +47,11 @@ export default function VideoDetailPage({ params }: PageProps) {
       {/* Player */}
       <div className="w-full rounded-xl overflow-hidden bg-black aspect-video">
         <video
-          src={video.videoUrl}
+          src={getMediaPath(video.videoUrl)}
           controls
           className="w-full h-full"
-          poster={video.thumbnailUrl ?? undefined}
+          poster={getMediaPath(video.thumbnailUrl) || undefined}
+          preload="metadata"
         />
       </div>
 

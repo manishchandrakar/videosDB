@@ -8,6 +8,7 @@ import {
   ChangePasswordInput,
   UserPublic,
   RegisterInput,
+  SignupInput,
 } from '@/types';
 
 export const authService = {
@@ -33,6 +34,11 @@ export const authService = {
 
   changePassword: async (input: ChangePasswordInput): Promise<void> => {
     await axiosInstance.patch('/auth/change-password', input);
+  },
+
+  signup: async (input: SignupInput): Promise<LoginResponse> => {
+    const { data } = await axiosInstance.post<ApiResponse<LoginResponse>>('/auth/signup', input);
+    return data.data!;
   },
 
   register: async (input: RegisterInput): Promise<UserPublic> => {

@@ -2,13 +2,14 @@
 
 import {
   useQuery,
+  useInfiniteQuery,
   useMutation,
   useQueryClient,
   keepPreviousData,
 } from '@tanstack/react-query';
 import { videoService } from '@/services/videoService';
 import { VideoQuery, VideoUpdateInput } from '@/types';
-import { QUERY_KEYS } from '@/constants';
+import { QUERY_KEYS, DEFAULT_LIMIT } from '@/constants';
 
 // ─── Public hooks ─────────────────────────────────────────────────────────────
 export function useVideos(query?: VideoQuery) {
@@ -44,12 +45,34 @@ export function useSearchVideos(q: string, tags?: string) {
   });
 }
 
+export function useInfiniteVideos(query?: Omit<VideoQuery, 'page' | 'limit'>) {
+  return useInfiniteQuery({
+    queryKey: [...QUERY_KEYS.VIDEOS, 'infinite', query],
+    queryFn: ({ pageParam }) =>
+      videoService.getVideos({ ...query, page: pageParam, limit: DEFAULT_LIMIT }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
+  });
+}
+
 // ─── Admin hooks ──────────────────────────────────────────────────────────────
 export function useAdminVideos(query?: VideoQuery) {
   return useQuery({
     queryKey: [...QUERY_KEYS.ADMIN_VIDEOS, query],
     queryFn: () => videoService.getAllVideosAdmin(query),
     placeholderData: keepPreviousData,
+  });
+}
+
+export function useInfiniteAdminVideos(query?: Omit<VideoQuery, 'page' | 'limit'>) {
+  return useInfiniteQuery({
+    queryKey: [...QUERY_KEYS.ADMIN_VIDEOS, 'infinite', query],
+    queryFn: ({ pageParam }) =>
+      videoService.getAllVideosAdmin({ ...query, page: pageParam, limit: DEFAULT_LIMIT }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.page < lastPage.totalPages ? lastPage.page + 1 : undefined,
   });
 }
 
