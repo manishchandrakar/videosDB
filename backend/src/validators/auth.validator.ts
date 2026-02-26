@@ -40,7 +40,7 @@ export const registerSchema = Joi.object({
     'any.required': 'Password is required',
   }),
 
-  role: Joi.string().valid('SUPER_ADMIN', 'MINI_ADMIN').optional(),
+  role: Joi.string().valid('SUPER_ADMIN', 'MINI_ADMIN', 'USER').optional(),
 });
 
 export const signupSchema = Joi.object({

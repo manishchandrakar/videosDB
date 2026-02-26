@@ -41,6 +41,10 @@ export class AuthService {
       throw ApiError.unauthorized(ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
 
+    if (user.role === IUserRole.USER) {
+      throw ApiError.unauthorized(ERROR_MESSAGES.INVALID_CREDENTIALS);
+    }
+
     if (user.isBlocked) {
       throw ApiError.forbidden('Your account has been blocked. Please contact an administrator.');
     }

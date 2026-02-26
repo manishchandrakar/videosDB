@@ -2,7 +2,7 @@ import { Response, NextFunction } from 'express';
 import { authService } from '../services/auth.service';
 import { ApiResponse } from '../utils/ApiResponse';
 import { asyncHandler } from '../utils/asyncHandler';
-import { IAuthLoginInput, IAuthRequest, IUserCreateInput } from '../interfaces';
+import { IAuthLoginInput, IAuthRequest, IUserCreateInput, IUserRole } from '../interfaces';
 
 export const login = asyncHandler(
   async (req: IAuthRequest, res: Response, _next: NextFunction): Promise<void> => {
@@ -11,16 +11,14 @@ export const login = asyncHandler(
   }
 );
 
-export const signup = asyncHandler(
-  async (req: IAuthRequest, res: Response, _next: NextFunction): Promise<void> => {
-    const result = await authService.signup(req.body as Omit<IUserCreateInput, 'role'>);
-    ApiResponse.created(res, 'Account created successfully', result);
-  }
-);
-
 export const register = asyncHandler(
   async (req: IAuthRequest, res: Response, _next: NextFunction): Promise<void> => {
-    const user = await authService.register(req.body as IUserCreateInput);
+    const body = req.body as IUserCreateInput;
+    // Mini admins can only create MINI_ADMIN users
+    if (req.user!.role === IUserRole.MINI_ADMIN) {
+      body.role = IUserRole.MINI_ADMIN;
+    }
+    const user = await authService.register(body);
     ApiResponse.created(res, 'User registered successfully', user);
   }
 );
