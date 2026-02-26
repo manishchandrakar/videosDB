@@ -93,6 +93,7 @@ export const uploadVideo = asyncHandler(
 
     const body = req.body as {
       title: string;
+      category?: string;
       tags?: string[];
       tagsRaw?: string;
       status?: IPublishStatus;
@@ -107,6 +108,7 @@ export const uploadVideo = asyncHandler(
 
     const video = await videoService.create({
       title: body.title,
+      category: body.category || undefined,
       tags,
       videoUrl: videoUpload.url,
       thumbnailUrl,

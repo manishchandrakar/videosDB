@@ -17,6 +17,7 @@ const mapVideo = (v: {
   id: string;
   title: string;
   slug: string;
+  category: string | null;
   tags: string[];
   videoUrl: string;
   thumbnailUrl: string | null;
@@ -35,6 +36,7 @@ export class VideoService {
       data: {
         title: input.title,
         slug,
+        category: input.category ?? null,
         tags: input.tags,
         videoUrl: input.videoUrl,
         thumbnailUrl: input.thumbnailUrl ?? null,
@@ -49,6 +51,7 @@ export class VideoService {
   async findAll(query: IVideoQuery): Promise<IVideoPaginated> {
     const {
       search,
+      category,
       tags,
       status,
       uploadedBy,
@@ -62,13 +65,14 @@ export class VideoService {
     const where: Prisma.VideoWhereInput = {
       ...(status && { status }),
       ...(uploadedBy && { uploadedBy }),
+      ...(category && { category }),
       ...(search && {
         OR: [{ title: { contains: search, mode: 'insensitive' } }, { tags: { hasSome: [search] } }],
       }),
       ...(tags && tags.length > 0 && { tags: { hasSome: tags } }),
     };
 
-    const [videos, total] = await prisma.$transaction([
+    const [videos, total] = await Promise.all([
       prisma.video.findMany({
         where,
         orderBy: { [sortBy]: sortOrder },
@@ -119,6 +123,7 @@ export class VideoService {
       where: { id },
       data: {
         ...(input.title && { title: input.title }),
+        ...(input.category !== undefined && { category: input.category || null }),
         ...(input.tags && { tags: input.tags }),
         ...(input.thumbnailUrl !== undefined && { thumbnailUrl: input.thumbnailUrl }),
         ...(input.status && { status: input.status }),
@@ -205,7 +210,7 @@ export class VideoService {
     recentUploads: IVideo[];
   }> {
     const [totalVideos, publishedVideos, draftVideos, viewsAgg, recentUploads] =
-      await prisma.$transaction([
+      await Promise.all([
         prisma.video.count(),
         prisma.video.count({ where: { status: 'PUBLISHED' } }),
         prisma.video.count({ where: { status: 'DRAFT' } }),

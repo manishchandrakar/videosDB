@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useUsers, useCreateUser, useDeleteUser } from '@/app/hooks/useAuth';
+import { useUsers, useCreateUser, useDeleteUser, useToggleBlock } from '@/app/hooks/useAuth';
 import { UserRole, UserPublic } from '@/types';
 import Input from '@/components/common/Input';
 import Button from '@/components/common/Button';
@@ -39,14 +39,16 @@ const roleBadgeVariant = (role: UserRole) =>
 const roleLabel = (role: UserRole) =>
   role === UserRole.SUPER_ADMIN ? 'Super Admin' : 'Mini Admin';
 
-export default function UsersPage() {
+ const  UsersPage = () => {
   const { data: users = [], isLoading } = useUsers();
   const { mutate: createUser, isPending: isCreating, error: createError, reset: resetMutation } = useCreateUser();
   const { mutate: deleteUser, isPending: isDeleting } = useDeleteUser();
+  const { mutate: toggleBlock, isPending: isToggling } = useToggleBlock();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [filter, setFilter] = useState<FilterTab>('all');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const {
     register,
@@ -84,6 +86,13 @@ export default function UsersPage() {
     if (!confirm(`Delete "${user.username}"? This cannot be undone.`)) return;
     setDeletingId(user.id);
     deleteUser(user.id, { onSettled: () => setDeletingId(null) });
+  };
+
+  const handleToggleBlock = (user: UserPublic) => {
+    const action = user.isBlocked ? 'unblock' : 'block';
+    if (!confirm(`${action.charAt(0).toUpperCase() + action.slice(1)} "${user.username}"?`)) return;
+    setTogglingId(user.id);
+    toggleBlock(user.id, { onSettled: () => setTogglingId(null) });
   };
 
   const filtered = filter === 'all' ? users : users.filter((u) => u.role === filter);
@@ -166,10 +175,18 @@ export default function UsersPage() {
                 <tr key={user.id} className="bg-card hover:bg-muted/30 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2.5">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground uppercase">
+                      <div className={[
+                        'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold uppercase',
+                        user.isBlocked ? 'bg-red-900/40 text-red-400' : 'bg-muted text-muted-foreground',
+                      ].join(' ')}>
                         {user.username[0]}
                       </div>
-                      <span className="font-medium text-foreground">{user.username}</span>
+                      <div className="flex flex-col">
+                        <span className="font-medium text-foreground">{user.username}</span>
+                        {user.isBlocked && (
+                          <span className="text-xs text-red-400">Blocked</span>
+                        )}
+                      </div>
                     </div>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{user.email}</td>
@@ -186,14 +203,24 @@ export default function UsersPage() {
                     })}
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      loading={isDeleting && deletingId === user.id}
-                      onClick={() => handleDelete(user)}
-                    >
-                      Delete
-                    </Button>
+                    <div className="flex items-center justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        loading={isToggling && togglingId === user.id}
+                        onClick={() => handleToggleBlock(user)}
+                      >
+                        {user.isBlocked ? 'Unblock' : 'Block'}
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        loading={isDeleting && deletingId === user.id}
+                        onClick={() => handleDelete(user)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -299,3 +326,5 @@ export default function UsersPage() {
     </div>
   );
 }
+
+export default UsersPage;

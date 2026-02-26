@@ -7,7 +7,6 @@ import {
   VideoSuggestion,
   VideoUpdateInput,
   DashboardStats,
-  PublishStatus,
 } from '@/types';
 
 export const videoService = {
@@ -15,6 +14,7 @@ export const videoService = {
   getVideos: async (query?: VideoQuery): Promise<PaginatedVideos> => {
     const params = new URLSearchParams();
     if (query?.search) params.set('search', query.search);
+    if (query?.category) params.set('category', query.category);
     if (query?.tags?.length) params.set('tags', query.tags.join(','));
     if (query?.status) params.set('status', query.status);
     if (query?.page) params.set('page', String(query.page));

@@ -10,6 +10,7 @@ import {
 import { videoService } from '@/services/videoService';
 import { VideoQuery, VideoUpdateInput } from '@/types';
 import { QUERY_KEYS, DEFAULT_LIMIT } from '@/constants';
+import { toastError, toastSuccess } from '@/utils/toast';
 
 // ─── Public hooks ─────────────────────────────────────────────────────────────
 export function useVideos(query?: VideoQuery) {
@@ -88,10 +89,12 @@ export function useUploadVideo() {
   return useMutation({
     mutationFn: (formData: FormData) => videoService.uploadVideo(formData),
     onSuccess: () => {
+      toastSuccess('Video uploaded successfully.');
       qc.invalidateQueries({ queryKey: QUERY_KEYS.VIDEOS });
       qc.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_VIDEOS });
       qc.invalidateQueries({ queryKey: QUERY_KEYS.DASHBOARD });
     },
+    onError: toastError,
   });
 }
 
@@ -101,10 +104,12 @@ export function useUpdateVideo() {
     mutationFn: ({ id, input }: { id: string; input: VideoUpdateInput }) =>
       videoService.updateVideo(id, input),
     onSuccess: (_data, { id }) => {
+      toastSuccess('Video updated.');
       qc.invalidateQueries({ queryKey: QUERY_KEYS.VIDEO_BY_ID(id) });
       qc.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_VIDEOS });
       qc.invalidateQueries({ queryKey: QUERY_KEYS.VIDEOS });
     },
+    onError: toastError,
   });
 }
 
@@ -113,10 +118,12 @@ export function useDeleteVideo() {
   return useMutation({
     mutationFn: (id: string) => videoService.deleteVideo(id),
     onSuccess: () => {
+      toastSuccess('Video deleted.');
       qc.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_VIDEOS });
       qc.invalidateQueries({ queryKey: QUERY_KEYS.VIDEOS });
       qc.invalidateQueries({ queryKey: QUERY_KEYS.DASHBOARD });
     },
+    onError: toastError,
   });
 }
 
@@ -125,8 +132,10 @@ export function useToggleStatus() {
   return useMutation({
     mutationFn: (id: string) => videoService.toggleStatus(id),
     onSuccess: () => {
+      toastSuccess('Status updated.');
       qc.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_VIDEOS });
       qc.invalidateQueries({ queryKey: QUERY_KEYS.VIDEOS });
     },
+    onError: toastError,
   });
 }

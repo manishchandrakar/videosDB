@@ -54,4 +54,9 @@ export const authService = {
   deleteUser: async (id: string): Promise<void> => {
     await axiosInstance.delete(`/auth/users/${id}`);
   },
+
+  toggleBlock: async (id: string): Promise<UserPublic> => {
+    const { data } = await axiosInstance.patch<ApiResponse<UserPublic>>(`/auth/users/${id}/block`);
+    return data.data!;
+  },
 };

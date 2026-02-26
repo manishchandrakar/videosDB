@@ -1,47 +1,106 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { useAuth } from '@/app/context/AuthContext';
-import { UserRole } from '@/types';
-import Button from '@/components/common/Button';
+import { UserRole, VIDEO_CATEGORIES } from '@/types';
 import ThemeToggle from '@/components/common/ThemeToggle';
+import Button from '@/components/common/Button';
 
-export default function Navbar() {
+const  Navbar = () =>  {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, isAuthenticated, logout } = useAuth();
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('');
 
-  if (pathname?.startsWith('/admin')) return null;
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/mini-admin')) return null;
+
+  const push = (s: string, c: string) => {
+    const params = new URLSearchParams();
+    if (s) params.set('search', s);
+    if (c) params.set('category', c);
+    const qs = params.toString();
+    router.push(qs ? `/?${qs}` : '/');
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    push(search.trim(), category);
+  };
+
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const c = e.target.value;
+    setCategory(c);
+    push(search.trim(), c);
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-        <Link href="/" className="text-lg font-bold text-foreground tracking-tight">
+      <nav className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3">
+        {/* Logo */}
+        <Link href="/" className="shrink-0 text-lg font-bold text-foreground tracking-tight">
           VideoHub
         </Link>
 
-        <div className="flex items-center gap-3">
-          {isAuthenticated ? (
+        {/* Search + Category */}
+        <form
+          onSubmit={handleSearchSubmit}
+          className="flex flex-1 items-center gap-2"
+        >
+          <div className="relative flex-1">
+            <svg
+              className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+            </svg>
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search videos..."
+              className="w-full rounded-lg border border-border bg-muted py-2 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+          </div>
+
+          <select
+            value={category}
+            onChange={handleCategoryChange}
+            className="rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer"
+          >
+            <option value="">All Categories</option>
+            {VIDEO_CATEGORIES.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+
+          <button
+            type="submit"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 transition-opacity"
+          >
+            Search
+          </button>
+        </form>
+
+        {/* Right side */}
+        <div className="flex shrink-0 items-center gap-3">
+          {isAuthenticated && (
             <>
               {(user?.role === UserRole.SUPER_ADMIN || user?.role === UserRole.MINI_ADMIN) && (
-                <>
-                  <Link href="/admin" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    Dashboard
-                  </Link>
-                  <Link href="/admin/upload" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    Upload
-                  </Link>
-                </>
+                <Link
+                  href={user.role === UserRole.SUPER_ADMIN ? '/admin' : '/mini-admin'}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Dashboard
+                </Link>
               )}
-              <span className="text-xs text-muted-foreground">{user?.email}</span>
               <Button variant="ghost" size="sm" onClick={logout}>
                 Logout
               </Button>
             </>
-          ) : (
-            <Link href="/login">
-              <Button size="sm">Login</Button>
-            </Link>
           )}
           <ThemeToggle />
         </div>
@@ -49,3 +108,5 @@ export default function Navbar() {
     </header>
   );
 }
+
+export default Navbar;

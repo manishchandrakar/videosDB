@@ -62,3 +62,11 @@ export const deleteUser = asyncHandler(
     ApiResponse.noContent(res);
   }
 );
+
+export const toggleBlock = asyncHandler(
+  async (req: IAuthRequest, res: Response, _next: NextFunction): Promise<void> => {
+    const { id } = req.params as { id: string };
+    const user = await authService.toggleBlock(id, req.user!.userId);
+    ApiResponse.ok(res, `User ${user.isBlocked ? 'blocked' : 'unblocked'} successfully`, user);
+  }
+);

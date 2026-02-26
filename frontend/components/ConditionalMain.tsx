@@ -1,12 +1,15 @@
-'use client';
+"use client";
 
-import { usePathname } from 'next/navigation';
-import { ReactNode } from 'react';
+import { usePathname } from "next/navigation";
+import { ReactNode } from "react";
 
-export default function ConditionalMain({ children }: { children: ReactNode }) {
+const ConditionalMain = (props: { children: ReactNode }) => {
+  const { children } = props;
   const pathname = usePathname();
-  if (pathname?.startsWith('/admin')) {
+  if (pathname?.startsWith("/admin") || pathname?.startsWith("/mini-admin")) {
     return <>{children}</>;
   }
   return <main className="mx-auto max-w-7xl px-4 py-6">{children}</main>;
-}
+};
+
+export default ConditionalMain;

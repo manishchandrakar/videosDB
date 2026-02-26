@@ -8,12 +8,25 @@ const tagSchema = Joi.string().pattern(REGEX.TAG).min(1).max(50).trim().messages
   'string.max': 'Tag must not exceed 50 characters',
 });
 
+const VALID_CATEGORIES = [
+  'Entertainment',
+  'Education',
+  'Technology',
+  'Gaming',
+  'Finance',
+  'Lifestyle',
+];
+
 export const createVideoSchema = Joi.object({
   title: Joi.string().pattern(REGEX.VIDEO_TITLE).min(3).max(200).trim().required().messages({
     'string.pattern.base': 'Title contains invalid characters',
     'string.min': 'Title must be at least 3 characters',
     'string.max': 'Title must not exceed 200 characters',
     'any.required': 'Title is required',
+  }),
+
+  category: Joi.string().valid(...VALID_CATEGORIES).optional().allow(null, '').messages({
+    'any.only': `Category must be one of: ${VALID_CATEGORIES.join(', ')}`,
   }),
 
   tags: Joi.array().items(tagSchema).min(1).max(20).optional().messages({
@@ -40,6 +53,10 @@ export const updateVideoSchema = Joi.object({
     'string.max': 'Title must not exceed 200 characters',
   }),
 
+  category: Joi.string().valid(...VALID_CATEGORIES).optional().allow(null, '').messages({
+    'any.only': `Category must be one of: ${VALID_CATEGORIES.join(', ')}`,
+  }),
+
   tags: Joi.array().items(tagSchema).min(1).max(20).optional().messages({
     'array.min': 'At least one tag is required',
     'array.max': 'Maximum 20 tags allowed',
@@ -54,6 +71,7 @@ export const updateVideoSchema = Joi.object({
 
 export const videoQuerySchema = Joi.object({
   search: Joi.string().max(100).trim().optional(),
+  category: Joi.string().valid(...VALID_CATEGORIES).optional().allow(''),
   tags: Joi.alternatives()
     .try(Joi.array().items(Joi.string().trim()), Joi.string().trim())
     .optional(),

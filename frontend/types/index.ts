@@ -10,6 +10,17 @@ export enum PublishStatus {
   PUBLISHED = 'PUBLISHED',
 }
 
+export const VIDEO_CATEGORIES = [
+  'Entertainment',
+  'Education',
+  'Technology',
+  'Gaming',
+  'Finance',
+  'Lifestyle',
+] as const;
+
+export type VideoCategory = (typeof VIDEO_CATEGORIES)[number];
+
 // ─── API Response ──────────────────────────────────────────────────────────────
 export interface ApiResponse<T = unknown> {
   success: boolean;
@@ -57,6 +68,7 @@ export interface Video {
   id: string;
   title: string;
   slug: string;
+  category: string | null;
   tags: string[];
   videoUrl: string;
   thumbnailUrl: string | null;
@@ -77,6 +89,7 @@ export interface PaginatedVideos {
 
 export interface VideoQuery {
   search?: string;
+  category?: string;
   tags?: string[];
   status?: PublishStatus;
   page?: number;
@@ -92,6 +105,7 @@ export interface VideoSuggestion {
 
 export interface VideoUpdateInput {
   title?: string;
+  category?: string | null;
   tags?: string[];
   thumbnailUrl?: string;
   status?: PublishStatus;
@@ -111,6 +125,7 @@ export interface UserPublic {
   username: string;
   email: string;
   role: UserRole;
+  isBlocked: boolean;
   createdAt: string;
   updatedAt: string;
 }

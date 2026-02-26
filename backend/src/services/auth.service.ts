@@ -41,6 +41,10 @@ export class AuthService {
       throw ApiError.unauthorized(ERROR_MESSAGES.INVALID_CREDENTIALS);
     }
 
+    if (user.isBlocked) {
+      throw ApiError.forbidden('Your account has been blocked. Please contact an administrator.');
+    }
+
     const tokens = this.generateTokens({
       userId: user.id,
       email: user.email,
@@ -121,6 +125,7 @@ export class AuthService {
       username: user.username,
       email: user.email,
       role: user.role as IUserRole,
+      isBlocked: user.isBlocked,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
@@ -168,12 +173,36 @@ export class AuthService {
         username: true,
         email: true,
         role: true,
+        isBlocked: true,
         createdAt: true,
         updatedAt: true,
       },
       orderBy: { createdAt: 'desc' },
     });
     return users.map((u) => ({ ...u, role: u.role as IUserRole }));
+  }
+
+  async toggleBlock(targetId: string, requesterId: string): Promise<IUserPublic> {
+    if (targetId === requesterId) {
+      throw ApiError.badRequest('You cannot block your own account');
+    }
+    const user = await prisma.user.findUnique({ where: { id: targetId } });
+    if (!user) throw ApiError.notFound(ERROR_MESSAGES.NOT_FOUND('User'));
+
+    const updated = await prisma.user.update({
+      where: { id: targetId },
+      data: { isBlocked: !user.isBlocked },
+    });
+
+    return {
+      id: updated.id,
+      username: updated.username,
+      email: updated.email,
+      role: updated.role as IUserRole,
+      isBlocked: updated.isBlocked,
+      createdAt: updated.createdAt,
+      updatedAt: updated.updatedAt,
+    };
   }
 
   async deleteUser(targetId: string, requesterId: string): Promise<void> {

@@ -18,4 +18,4 @@ export const DEFAULT_LIMIT = 12;
 // Used by utils.ts
 export const MAX_FILE_SIZE = 1024 * 1024; // 1 MB
 export const IMAGE_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-export const VIDEO_MIME_TYPES = ['video/mp4', 'video/webm', 'video/quicktime'];
+export const VIDEO_MIME_TYPES = ['video/mp4', 'video/webm', 'video/quicklime'];

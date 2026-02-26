@@ -11,9 +11,8 @@ import Badge from '@/components/common/Badge';
 import { PublishStatus, VIDEO_CATEGORIES } from '@/types';
 import { uploadSchema, UploadFormData } from '@/lib/schemas';
 
-const  UploadVideoPage = () =>   {
+export default function MiniAdminUploadPage() {
   const router = useRouter();
-
   const { mutateAsync: upload, isPending, error } = useUploadVideo();
 
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -31,11 +30,7 @@ const  UploadVideoPage = () =>   {
     formState: { errors },
   } = useForm<UploadFormData>({
     resolver: zodResolver(uploadSchema),
-    defaultValues: {
-      title: '',
-      tagsRaw: '',
-      status: PublishStatus.DRAFT,
-    },
+    defaultValues: { title: '', tagsRaw: '', status: PublishStatus.DRAFT },
     mode: 'onTouched',
     delayError: 300,
   });
@@ -43,10 +38,7 @@ const  UploadVideoPage = () =>   {
   const status = watch('status');
 
   const onSubmit = async (data: UploadFormData) => {
-    if (!videoFile) {
-      setFileError('Please select a video file');
-      return;
-    }
+    if (!videoFile) { setFileError('Please select a video file'); return; }
     setFileError('');
 
     const fd = new FormData();
@@ -59,10 +51,8 @@ const  UploadVideoPage = () =>   {
 
     try {
       await upload(fd);
-      router.push('/admin');
-    } catch {
-      // error shown below
-    }
+      router.push('/mini-admin');
+    } catch { /* shown below */ }
   };
 
   const apiError = error
@@ -72,8 +62,8 @@ const  UploadVideoPage = () =>   {
   return (
     <div className="mx-auto max-w-xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Upload Video</h1>
-        <p className="mt-1 text-sm text-zinc-500">Fill in the details and select your video file.</p>
+        <h1 className="text-2xl font-bold text-foreground">Upload Video</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Fill in the details and select your video file.</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
@@ -86,10 +76,10 @@ const  UploadVideoPage = () =>   {
 
         {/* Category */}
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-zinc-300">Category</label>
+          <label className="text-sm font-medium text-foreground">Category</label>
           <select
             {...register('category')}
-            className="rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2.5 text-sm text-zinc-300 focus:outline-none focus:ring-2 focus:ring-ring"
+            className="rounded-lg border border-border bg-muted px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="">Select a category (optional)</option>
             {VIDEO_CATEGORIES.map((c) => (
@@ -108,7 +98,7 @@ const  UploadVideoPage = () =>   {
 
         {/* Status toggle */}
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-zinc-300">Status</label>
+          <label className="text-sm font-medium text-foreground">Status</label>
           <div className="flex gap-2">
             {[PublishStatus.DRAFT, PublishStatus.PUBLISHED].map((s) => (
               <button
@@ -119,7 +109,7 @@ const  UploadVideoPage = () =>   {
                   'rounded-lg border px-4 py-2 text-sm font-medium transition-colors',
                   status === s
                     ? 'border-blue-500 bg-blue-600/20 text-blue-400'
-                    : 'border-zinc-700 bg-zinc-800 text-zinc-400 hover:border-zinc-600',
+                    : 'border-border bg-muted text-muted-foreground hover:border-muted-foreground',
                 ].join(' ')}
               >
                 {s}
@@ -130,15 +120,15 @@ const  UploadVideoPage = () =>   {
 
         {/* Video file */}
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-zinc-300">Video File *</label>
+          <label className="text-sm font-medium text-foreground">Video File *</label>
           <div
-            className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-zinc-700 bg-zinc-800/50 p-8 text-zinc-500 hover:border-zinc-600 transition-colors"
+            className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-muted/50 p-8 text-muted-foreground hover:border-muted-foreground transition-colors"
             onClick={() => videoRef.current?.click()}
           >
             {videoFile ? (
               <div className="flex items-center gap-2">
                 <Badge variant="success">Selected</Badge>
-                <span className="text-sm text-zinc-300 truncate max-w-xs">{videoFile.name}</span>
+                <span className="text-sm text-foreground truncate max-w-xs">{videoFile.name}</span>
               </div>
             ) : (
               <>
@@ -150,26 +140,16 @@ const  UploadVideoPage = () =>   {
               </>
             )}
           </div>
-          <input
-            ref={videoRef}
-            type="file"
-            accept="video/*"
-            className="hidden"
-            onChange={(e) => {
-              setVideoFile(e.target.files?.[0] ?? null);
-              setFileError('');
-            }}
-          />
-          {fileError && (
-            <p className="text-sm text-red-400">{fileError}</p>
-          )}
+          <input ref={videoRef} type="file" accept="video/*" className="hidden"
+            onChange={(e) => { setVideoFile(e.target.files?.[0] ?? null); setFileError(''); }} />
+          {fileError && <p className="text-sm text-red-400">{fileError}</p>}
         </div>
 
-        {/* Thumbnail file */}
+        {/* Thumbnail */}
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-zinc-300">Thumbnail (optional)</label>
+          <label className="text-sm font-medium text-foreground">Thumbnail (optional)</label>
           <div
-            className="flex cursor-pointer items-center gap-3 rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-3 text-sm text-zinc-400 hover:border-zinc-600 transition-colors"
+            className="flex cursor-pointer items-center gap-3 rounded-lg border border-border bg-muted px-4 py-3 text-sm text-muted-foreground hover:border-muted-foreground transition-colors"
             onClick={() => thumbRef.current?.click()}
           >
             <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -178,13 +158,8 @@ const  UploadVideoPage = () =>   {
             </svg>
             <span className="truncate">{thumbFile ? thumbFile.name : 'Select thumbnail image'}</span>
           </div>
-          <input
-            ref={thumbRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => setThumbFile(e.target.files?.[0] ?? null)}
-          />
+          <input ref={thumbRef} type="file" accept="image/*" className="hidden"
+            onChange={(e) => setThumbFile(e.target.files?.[0] ?? null)} />
         </div>
 
         {apiError && (
@@ -205,5 +180,3 @@ const  UploadVideoPage = () =>   {
     </div>
   );
 }
-
-export default UploadVideoPage;

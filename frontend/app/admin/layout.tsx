@@ -7,10 +7,14 @@ import { useAuth } from '@/app/context/AuthContext';
 import { UserRole } from '@/types';
 import Button from '@/components/common/Button';
 import ThemeToggle from '@/components/common/ThemeToggle';
-import Spinner from '@/components/common/Spinner';
+import { AdminPageSkeleton } from '@/components/common/Skeleton';
 import Badge from '@/components/common/Badge';
 
-const ADMIN_ROLES: UserRole[] = [UserRole.SUPER_ADMIN, UserRole.MINI_ADMIN];
+import {
+  HiOutlineHome,
+  HiOutlineCloudArrowUp,
+  HiOutlineUsers,
+} from 'react-icons/hi2';
 
 const NAV_ITEMS = [
   {
@@ -18,64 +22,58 @@ const NAV_ITEMS = [
     label: 'Dashboard',
     exact: true,
     superAdminOnly: false,
-    icon: (
-      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-          d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-      </svg>
-    ),
+    icon: <HiOutlineHome className="h-4 w-4" />,
   },
   {
     href: '/admin/upload',
     label: 'Upload Video',
     exact: false,
     superAdminOnly: false,
-    icon: (
-      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-      </svg>
-    ),
+    icon: <HiOutlineCloudArrowUp className="h-4 w-4" />,
   },
   {
     href: '/admin/users',
     label: 'Users',
     exact: false,
     superAdminOnly: true,
-    icon: (
-      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
+    icon: <HiOutlineUsers className="h-4 w-4" />,
   },
 ];
-
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+const  AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const pathname = usePathname();
   const { user, isLoading, logout } = useAuth();
 
   useEffect(() => {
     if (isLoading) return;
-    if (!user || !ADMIN_ROLES.includes(user.role as UserRole)) {
+    if (!user) {
       router.replace('/login/admin');
+    } else if (user.role === UserRole.MINI_ADMIN) {
+      router.replace('/mini-admin');
+    } else if (user.role === UserRole.USER) {
+      router.replace('/');
     }
   }, [isLoading, user, router]);
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Spinner size="lg" />
+      <div className="flex min-h-screen bg-background">
+        <aside className="w-56 shrink-0 border-r border-border bg-card" />
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <header className="h-12 border-b border-border bg-card" />
+          <main className="flex-1 p-6">
+            <AdminPageSkeleton />
+          </main>
+        </div>
       </div>
     );
   }
 
-  if (!user || !ADMIN_ROLES.includes(user.role as UserRole)) {
+  if (!user || user.role !== UserRole.SUPER_ADMIN) {
     return null;
   }
 
-  const isSuperAdmin = user.role === UserRole.SUPER_ADMIN;
+  const isSuperAdmin = true;
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -97,7 +95,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <p className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
             Menu
           </p>
-          {NAV_ITEMS.filter((item) => !item.superAdminOnly || isSuperAdmin).map(({ href, label, exact, icon }) => {
+          {NAV_ITEMS.map(({ href, label, exact, icon }) => {
             const active = exact ? pathname === href : pathname?.startsWith(href) ?? false;
             return (
               <Link
@@ -156,3 +154,5 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </div>
   );
 }
+
+export default AdminLayout;

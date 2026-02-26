@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { login, signup, register, refreshTokens, changePassword, me, getUsers, deleteUser } from '../controllers/auth.controller';
+import { login, signup, register, refreshTokens, changePassword, me, getUsers, deleteUser, toggleBlock } from '../controllers/auth.controller';
 import { validate, authenticate, superAdminOnly } from '../middleware';
 import { loginSchema, signupSchema, registerSchema, changePasswordSchema } from '../validators/auth.validator';
 import { authRateLimiter } from '../middleware/rateLimiter.middleware';
@@ -20,5 +20,6 @@ router.patch('/change-password', authenticate, validate(changePasswordSchema), c
 router.post('/register', authenticate, superAdminOnly, validate(registerSchema), register);
 router.get('/users', authenticate, superAdminOnly, getUsers);
 router.delete('/users/:id', authenticate, superAdminOnly, deleteUser);
+router.patch('/users/:id/block', authenticate, superAdminOnly, toggleBlock);
 
 export default router;

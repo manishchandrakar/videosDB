@@ -1,16 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useInfiniteVideos, useSearchVideos } from '@/app/hooks/useVideos';
 import VideoGrid from '@/components/custom/VideoGrid';
-import SearchBar from '@/components/custom/SearchBar';
 import InfiniteScrollSentinel from '@/components/custom/InfiniteScrollSentinel';
 import useDebounce from '@/utils/utils';
 
-export default function HomePage() {
-  const [search, setSearch] = useState('');
-  const debouncedSearch = useDebounce(search, 400);
+const  HomeContent = () =>   {
+  const searchParams = useSearchParams();
+  const search = searchParams.get('search') ?? '';
+  const category = searchParams.get('category') ?? '';
 
+  const debouncedSearch = useDebounce(search, 400);
   const isSearching = debouncedSearch.length > 0;
 
   const {
@@ -19,7 +20,7 @@ export default function HomePage() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useInfiniteVideos();
+  } = useInfiniteVideos({ category: category || undefined });
 
   const { data: searchResult, isLoading: searchLoading } = useSearchVideos(debouncedSearch);
 
@@ -35,22 +36,29 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Videos</h1>
-          {(browsingData || searchResult) && (
-            <p className="mt-0.5 text-sm text-zinc-500">
-              {total} video{total === 1 ? '' : 's'}
-            </p>
-          )}
-        </div>
-        <SearchBar onSearch={setSearch} />
+      <div>
+        <h1 className="text-2xl font-bold text-white">
+          {category ? category : 'All Videos'}
+        </h1>
+        {(browsingData || searchResult) && (
+          <p className="mt-0.5 text-sm text-zinc-500">
+            {total} video{total === 1 ? '' : 's'}
+            {isSearching && ` for "${search}"`}
+            {category && !isSearching && ` in ${category}`}
+          </p>
+        )}
       </div>
 
       <VideoGrid
         videos={videos}
         isLoading={isLoading}
-        emptyMessage={isSearching ? `No results for "${debouncedSearch}"` : 'No videos published yet.'}
+        emptyMessage={
+          isSearching
+            ? `No results for "${debouncedSearch}"`
+            : category
+            ? `No videos in ${category} yet.`
+            : 'No videos published yet.'
+        }
       />
 
       {!isSearching && (
@@ -63,3 +71,15 @@ export default function HomePage() {
     </div>
   );
 }
+
+import { Suspense } from 'react';
+import { VideoGridSkeleton } from '@/components/common/Skeleton';
+
+const  HomePage = () =>  {
+  return (
+    <Suspense fallback={<VideoGridSkeleton count={12} />}>
+      <HomeContent />
+    </Suspense>
+  );
+}
+export default HomePage;

@@ -10,6 +10,7 @@ export interface IUser {
   email: string;
   password: string;
   role: IUserRole;
+  isBlocked: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -7,6 +7,7 @@ export interface IVideo {
   id: string;
   title: string;
   slug: string;
+  category: string | null;
   tags: string[];
   videoUrl: string;
   thumbnailUrl: string | null;
@@ -19,6 +20,7 @@ export interface IVideo {
 
 export interface IVideoCreateInput {
   title: string;
+  category?: string;
   tags: string[];
   videoUrl: string;
   thumbnailUrl?: string;
@@ -28,6 +30,7 @@ export interface IVideoCreateInput {
 
 export interface IVideoUpdateInput {
   title?: string;
+  category?: string | null;
   tags?: string[];
   thumbnailUrl?: string;
   status?: IPublishStatus;
@@ -35,6 +38,7 @@ export interface IVideoUpdateInput {
 
 export interface IVideoQuery {
   search?: string;
+  category?: string;
   tags?: string[];
   status?: IPublishStatus;
   uploadedBy?: string;

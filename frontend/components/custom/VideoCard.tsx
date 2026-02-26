@@ -1,10 +1,14 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { useState } from 'react';
 import { Video, PublishStatus } from '@/types';
 import Badge from '@/components/common/Badge';
 import { getMediaPath } from '@/utils/mediaUtils';
+import Button from '../common/Button';
 
-interface VideoCardProps {
+interface IVideoCardProps {
   video: Video;
   showStatus?: boolean;
   onDelete?: (id: string) => void;
@@ -12,13 +16,13 @@ interface VideoCardProps {
   uploaderName?: string;
 }
 
-function formatViews(views: number): string {
+const  formatViews = (views: number): string => {
   if (views >= 1_000_000) return `${(views / 1_000_000).toFixed(1)}M`;
   if (views >= 1_000) return `${(views / 1_000).toFixed(1)}K`;
   return String(views);
 }
 
-function formatDate(dateStr: string): string {
+const  formatDate = (dateStr: string): string =>   {
   return new Date(dateStr).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -26,32 +30,37 @@ function formatDate(dateStr: string): string {
   });
 }
 
-export default function VideoCard({
-  video,
-  showStatus = false,
-  onDelete,
-  onToggleStatus,
-  uploaderName,
-}: VideoCardProps) {
+const  ThumbnailPlaceholder = () =>  {
+  return (
+    <div className="flex h-full items-center justify-center">
+      <svg className="h-12 w-12 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+          d="M15 10l4.553-2.276A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
+      </svg>
+    </div>
+  );
+}
+
+const  VideoCard = (props: IVideoCardProps) => {
+  const { video, showStatus = false, onDelete, onToggleStatus, uploaderName } = props;
+  const [imgError, setImgError] = useState(false);
+  const thumbSrc = video.thumbnailUrl ? getMediaPath(video.thumbnailUrl) : null;
+
   return (
     <div className="group flex flex-col rounded-xl bg-card border border-border overflow-hidden hover:border-muted-foreground transition-colors">
       {/* Thumbnail */}
       <Link href={`/videos/${video.slug}`} className="relative block aspect-video bg-muted">
-        {video.thumbnailUrl ? (
+        {thumbSrc && !imgError ? (
           <Image
-            src={getMediaPath(video.thumbnailUrl)}
+            src={thumbSrc}
             alt={video.title}
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-300"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            onError={() => setImgError(true)}
           />
         ) : (
-          <div className="flex h-full items-center justify-center">
-            <svg className="h-12 w-12 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                d="M15 10l4.553-2.276A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
-            </svg>
-          </div>
+          <ThumbnailPlaceholder />
         )}
         {showStatus && (
           <div className="absolute top-2 left-2">
@@ -102,20 +111,18 @@ export default function VideoCard({
         {(onDelete || onToggleStatus) && (
           <div className="flex gap-2 pt-2 border-t border-border mt-1">
             {onToggleStatus && (
-              <button
-                onClick={() => onToggleStatus(video.id)}
-                className="flex-1 rounded py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-              >
+
+              <Button variant="outline" size="sm" className="flex-1 rounded py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors" onClick={() => onToggleStatus(video.id)}>
                 {video.status === PublishStatus.PUBLISHED ? 'Unpublish' : 'Publish'}
-              </button>
+              </Button>
+           
             )}
             {onDelete && (
-              <button
-                onClick={() => onDelete(video.id)}
-                className="rounded py-1 px-2 text-xs font-medium text-red-400 hover:text-red-300 hover:bg-red-900/20 transition-colors"
-              >
+
+              <Button variant="outline" size="sm" className="flex-1 rounded py-1 text-xs font-medium text-red-400 hover:text-red-300 hover:bg-red-900/20 transition-colors" onClick={() => onDelete(video.id)}>
                 Delete
-              </button>
+              </Button>
+          
             )}
           </div>
         )}
@@ -123,3 +130,5 @@ export default function VideoCard({
     </div>
   );
 }
+
+export default VideoCard;
