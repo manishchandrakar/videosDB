@@ -1,4 +1,4 @@
-import { IAuthTokens } from '@/types/common'
+import { IAuthTokens } from "@/types"
 
 export const getStoredRefreshToken = (): string | null => {
 	try {

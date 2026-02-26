@@ -1,8 +1,8 @@
+import { BadgeVariant } from '@/types/commonType';
 import { ReactNode } from 'react';
 
-type BadgeVariant = 'default' | 'success' | 'warning' | 'danger' | 'info';
 
-interface BadgeProps {
+interface IBadgeProps {
   children: ReactNode;
   variant?: BadgeVariant;
   className?: string;
@@ -16,7 +16,8 @@ const variantClasses: Record<BadgeVariant, string> = {
   info: 'bg-blue-200/50 text-blue-400 border border-blue-800',
 };
 
-export default function Badge({ children, variant = 'default', className = '' }: BadgeProps) {
+const  Badge = (props: IBadgeProps) => {
+  const { children, variant = 'default', className = '' } = props;
   return (
     <span
       className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${variantClasses[variant]} ${className}`}
@@ -25,3 +26,4 @@ export default function Badge({ children, variant = 'default', className = '' }:
     </span>
   );
 }
+export default Badge;
