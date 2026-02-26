@@ -68,6 +68,7 @@ export interface Video {
   id: string;
   title: string;
   slug: string;
+  description: string | null;
   category: string | null;
   tags: string[];
   videoUrl: string;
@@ -105,6 +106,7 @@ export interface VideoSuggestion {
 
 export interface VideoUpdateInput {
   title?: string;
+  description?: string | null;
   category?: string | null;
   tags?: string[];
   thumbnailUrl?: string;

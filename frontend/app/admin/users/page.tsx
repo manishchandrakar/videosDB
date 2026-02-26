@@ -289,7 +289,7 @@ const roleLabel = (role: UserRole) =>
                         'flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors',
                         selectedRole === r
                           ? r === UserRole.SUPER_ADMIN
-                            ? 'border-blue-500 bg-blue-600/20 text-blue-400'
+                            ? 'border-blue-500 bg-blue-600/20 text-gray-400'
                             : 'border-zinc-500 bg-zinc-700 text-zinc-200'
                           : 'border-border bg-muted text-muted-foreground hover:border-muted-foreground',
                       ].join(' ')}

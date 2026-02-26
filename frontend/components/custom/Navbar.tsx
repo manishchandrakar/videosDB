@@ -38,8 +38,7 @@ const  Navbar = () =>  {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm">
-      <nav className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3">
-        {/* Logo */}
+     <nav className="mx-auto flex w-full md:max-w-7xl flex-col gap-3 px-4 py-3 md:flex-row md:items-center">   {/* Logo */}
         <Link href="/" className="shrink-0 text-lg font-bold text-foreground tracking-tight">
           VideoHub
         </Link>

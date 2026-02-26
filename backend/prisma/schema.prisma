@@ -35,6 +35,7 @@ model Video {
   id           String        @id @default(cuid())
   title        String
   slug         String        @unique
+  description  String?
   category     String?
   tags         String[]
   videoUrl     String

@@ -17,6 +17,7 @@ const mapVideo = (v: {
   id: string;
   title: string;
   slug: string;
+  description: string | null;
   category: string | null;
   tags: string[];
   videoUrl: string;
@@ -36,6 +37,7 @@ export class VideoService {
       data: {
         title: input.title,
         slug,
+        description: input.description ?? null,
         category: input.category ?? null,
         tags: input.tags,
         videoUrl: input.videoUrl,
@@ -123,6 +125,7 @@ export class VideoService {
       where: { id },
       data: {
         ...(input.title && { title: input.title }),
+        ...(input.description !== undefined && { description: input.description || null }),
         ...(input.category !== undefined && { category: input.category || null }),
         ...(input.tags && { tags: input.tags }),
         ...(input.thumbnailUrl !== undefined && { thumbnailUrl: input.thumbnailUrl }),

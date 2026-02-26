@@ -43,6 +43,7 @@ export default function MiniAdminUploadPage() {
 
     const fd = new FormData();
     fd.append('title', data.title);
+    if (data.description) fd.append('description', data.description);
     if (data.category) fd.append('category', data.category);
     fd.append('tagsRaw', data.tagsRaw ?? '');
     fd.append('status', data.status);
@@ -60,7 +61,7 @@ export default function MiniAdminUploadPage() {
     : null;
 
   return (
-    <div className="mx-auto max-w-xl">
+    <div className="mx-auto w-full max-w-xl">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">Upload Video</h1>
         <p className="mt-1 text-sm text-muted-foreground">Fill in the details and select your video file.</p>
@@ -73,6 +74,22 @@ export default function MiniAdminUploadPage() {
           error={errors.title?.message}
           {...register('title')}
         />
+
+        {/* Description */}
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-medium text-foreground">
+            Description <span className="text-muted-foreground font-normal">(optional)</span>
+          </label>
+          <textarea
+            {...register('description')}
+            placeholder="Describe your video…"
+            rows={3}
+            className="rounded-lg border border-border bg-muted px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+          />
+          {errors.description && (
+            <p className="text-xs text-red-400">{errors.description.message}</p>
+          )}
+        </div>
 
         {/* Category */}
         <div className="flex flex-col gap-1">
@@ -168,12 +185,12 @@ export default function MiniAdminUploadPage() {
           </p>
         )}
 
-        <div className="flex gap-3 pt-2">
+        <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
+          <Button type="button" variant="ghost" className="w-full sm:w-auto" onClick={() => router.back()}>
+            Cancel
+          </Button>
           <Button type="submit" loading={isPending} className="flex-1">
             {isPending ? 'Uploading…' : 'Upload Video'}
-          </Button>
-          <Button type="button" variant="ghost" onClick={() => router.back()}>
-            Cancel
           </Button>
         </div>
       </form>

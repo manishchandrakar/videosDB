@@ -1,6 +1,6 @@
 'use client';
 
-import { use } from 'react';
+import { use, useRef } from 'react';
 import { useVideoBySlug, useVideoSuggestions } from '@/app/hooks/useVideos';
 import VideoGrid from '@/components/custom/VideoGrid';
 import Badge from '@/components/common/Badge';
@@ -24,6 +24,14 @@ export default function VideoDetailPage({ params }: PageProps) {
   const { slug } = use(params);
   const { data: video, isLoading, error } = useVideoBySlug(slug);
   const { data: suggestions } = useVideoSuggestions(video?.id ?? '');
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const handleLoadedMetadata = () => {
+    const vid = videoRef.current;
+    if (!vid) return;
+    vid.muted = false;
+    vid.volume = 1;
+  };
 
   if (isLoading) {
     return (
@@ -47,11 +55,13 @@ export default function VideoDetailPage({ params }: PageProps) {
       {/* Player */}
       <div className="w-full rounded-xl overflow-hidden bg-black aspect-video">
         <video
+          ref={videoRef}
           src={getMediaPath(video.videoUrl)}
           controls
           className="w-full h-full"
           poster={getMediaPath(video.thumbnailUrl) || undefined}
           preload="metadata"
+          onLoadedMetadata={handleLoadedMetadata}
         />
       </div>
 
@@ -69,6 +79,12 @@ export default function VideoDetailPage({ params }: PageProps) {
           <span>·</span>
           <span>{formatDate(video.createdAt)}</span>
         </div>
+
+        {video.description && (
+          <p className="text-sm text-zinc-400 leading-relaxed whitespace-pre-wrap">
+            {video.description}
+          </p>
+        )}
 
         {video.tags.length > 0 && (
           <div className="flex flex-wrap gap-2">

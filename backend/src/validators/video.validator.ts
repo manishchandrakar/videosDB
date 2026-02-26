@@ -25,6 +25,10 @@ export const createVideoSchema = Joi.object({
     'any.required': 'Title is required',
   }),
 
+  description: Joi.string().max(2000).trim().optional().allow(null, '').messages({
+    'string.max': 'Description must not exceed 2000 characters',
+  }),
+
   category: Joi.string().valid(...VALID_CATEGORIES).optional().allow(null, '').messages({
     'any.only': `Category must be one of: ${VALID_CATEGORIES.join(', ')}`,
   }),
@@ -51,6 +55,10 @@ export const updateVideoSchema = Joi.object({
     'string.pattern.base': 'Title contains invalid characters',
     'string.min': 'Title must be at least 3 characters',
     'string.max': 'Title must not exceed 200 characters',
+  }),
+
+  description: Joi.string().max(2000).trim().optional().allow(null, '').messages({
+    'string.max': 'Description must not exceed 2000 characters',
   }),
 
   category: Joi.string().valid(...VALID_CATEGORIES).optional().allow(null, '').messages({

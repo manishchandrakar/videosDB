@@ -64,6 +64,11 @@ export const uploadSchema = z.object({
     .max(100, 'Title must be 100 characters or less')
     .refine((v) => v.trim().length > 0, 'Title cannot be only whitespace'),
 
+  description: z
+    .string()
+    .max(2000, 'Description must be 2000 characters or less')
+    .optional(),
+
   category: z.enum(VIDEO_CATEGORIES).optional(),
 
   // Optional comma-separated tags: each tag is letters/numbers/hyphens
@@ -78,7 +83,7 @@ export const uploadSchema = z.object({
       'Tags must be comma-separated words (letters, numbers, hyphens only)'
     ),
 
-  status: z.nativeEnum(PublishStatus),
+  status: z.enum([PublishStatus.DRAFT, PublishStatus.PUBLISHED]),
 });
 
 export type UploadFormData = z.infer<typeof uploadSchema>;

@@ -1,10 +1,15 @@
 import multer from 'multer';
-import path from 'path';
+import path from 'node:path';
+import fs from 'node:fs';
 import { Request } from 'express';
 import { ApiError } from '../utils';
 import { CONSTANTS } from '../constants';
 
 const MB = 1024 * 1024;
+
+// Absolute path — works regardless of which directory the server is started from
+const TEMP_DIR = path.join(__dirname, '../../uploads/temp');
+if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR, { recursive: true });
 
 const fileFilter =
   (allowedTypes: readonly string[]) =>
@@ -18,7 +23,7 @@ const fileFilter =
 
 const tempStorage = multer.diskStorage({
   destination: (_req, _file, cb) => {
-    cb(null, 'uploads/temp');
+    cb(null, TEMP_DIR);
   },
   filename: (_req, file, cb) => {
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;

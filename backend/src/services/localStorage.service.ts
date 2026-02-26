@@ -1,10 +1,11 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { IUploadResult } from '../interfaces';
 import { logger } from '../utils/logger';
 import { env } from '../config/env';
 
-const UPLOAD_DIR = path.join(process.cwd(), 'uploads');
+// Absolute path — resolves to backend/uploads regardless of cwd
+const UPLOAD_DIR = path.join(__dirname, '../../uploads');
 
 export class LocalStorageService {
   constructor() {
