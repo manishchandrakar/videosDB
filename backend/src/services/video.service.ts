@@ -147,9 +147,13 @@ export class VideoService {
     await prisma.video.delete({ where: { id } });
   }
 
-  async toggleStatus(id: string): Promise<IVideo> {
+  async toggleStatus(id: string, userId: string, isSuperAdmin: boolean): Promise<IVideo> {
     const video = await prisma.video.findUnique({ where: { id } });
     if (!video) throw ApiError.notFound(ERROR_MESSAGES.NOT_FOUND('Video'));
+
+    if (!isSuperAdmin && video.uploadedBy !== userId) {
+      throw ApiError.forbidden('You can only change the status of your own videos');
+    }
 
     const newStatus = video.status === 'PUBLISHED' ? 'DRAFT' : 'PUBLISHED';
     const updated = await prisma.video.update({ where: { id }, data: { status: newStatus } });

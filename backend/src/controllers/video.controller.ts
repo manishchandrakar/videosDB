@@ -150,7 +150,8 @@ export const deleteVideo = asyncHandler(
 export const togglePublishStatus = asyncHandler(
   async (req: IAuthRequest, res: Response, _next: NextFunction): Promise<void> => {
     const { id } = req.params as { id: string };
-    const video = await videoService.toggleStatus(id);
+    const isSuperAdmin = req.user!.role === IUserRole.SUPER_ADMIN;
+    const video = await videoService.toggleStatus(id, req.user!.userId, isSuperAdmin);
     ApiResponse.ok(
       res,
       `Video ${video.status === IPublishStatus.PUBLISHED ? 'published' : 'unpublished'}`,

@@ -52,6 +52,6 @@ router.get('/admin/dashboard', authenticate, superAdminOnly, getDashboard);
 router.get('/admin/:id', authenticate, superAdminOnly, getVideoById);
 router.patch('/:id', authenticate, superAdminOnly, validate(updateVideoSchema), updateVideo);
 router.delete('/:id', authenticate, superAdminOnly, deleteVideo);
-router.patch('/:id/status', authenticate, superAdminOnly, togglePublishStatus);
+router.patch('/:id/status', authenticate, adminOrMiniAdmin, togglePublishStatus);
 
 export default router;
