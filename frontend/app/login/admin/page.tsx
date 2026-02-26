@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -101,11 +100,6 @@ const  AdminLoginPage = () =>  {
           </form>
         </div>
 
-        <p className="mt-4 text-center text-xs text-muted-foreground">
-          <Link href="/login" className="text-muted-foreground hover:text-foreground">
-            ← Back to login options
-          </Link>
-        </p>
       </div>
     </div>
   );

@@ -8,7 +8,7 @@ import { UserRole } from '@/types';
 import Button from '@/components/common/Button';
 import { MiniAdminPageSkeleton } from '@/components/common/Skeleton';
 import { HiOutlineVideoCamera } from 'react-icons/hi';
-import { HiOutlineCloudArrowUp, HiOutlineBars3, HiOutlineXMark } from 'react-icons/hi2';
+import { HiOutlineCloudArrowUp, HiOutlineBars3, HiOutlineXMark, HiOutlineUsers } from 'react-icons/hi2';
 
 const NAV_ITEMS = [
   {
@@ -20,6 +20,11 @@ const NAV_ITEMS = [
     href: '/mini-admin/upload',
     label: 'Upload Video',
     icon: HiOutlineCloudArrowUp,
+  },
+  {
+    href: '/mini-admin/users',
+    label: 'Users',
+    icon: HiOutlineUsers,
   },
 ];
 

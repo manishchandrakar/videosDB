@@ -26,20 +26,34 @@ const createUserSchema = z.object({
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/,
       'Must include uppercase, lowercase, number and special character'
     ),
-  role: z.enum([UserRole.SUPER_ADMIN, UserRole.MINI_ADMIN]),
+  role: z.enum([UserRole.SUPER_ADMIN, UserRole.MINI_ADMIN, UserRole.USER]),
 });
 
 type CreateUserForm = z.infer<typeof createUserSchema>;
 
-type FilterTab = 'all' | UserRole.SUPER_ADMIN | UserRole.MINI_ADMIN;
+type FilterTab = 'all' | UserRole.SUPER_ADMIN | UserRole.MINI_ADMIN | UserRole.USER;
 
-const roleBadgeVariant = (role: UserRole) =>
-  role === UserRole.SUPER_ADMIN ? 'info' : 'default';
+const ROLE_CONFIG: Record<UserRole, { label: string; badgeVariant: 'info' | 'success' | 'default'; activeClass: string }> = {
+  [UserRole.SUPER_ADMIN]: {
+    label: 'Admin',
+    badgeVariant: 'info',
+    activeClass: 'border-blue-500 bg-blue-600/20 text-blue-300',
+  },
+  [UserRole.MINI_ADMIN]: {
+    label: 'Mini Admin',
+    badgeVariant: 'success',
+    activeClass: 'border-emerald-500 bg-emerald-600/20 text-emerald-300',
+  },
+  [UserRole.USER]: {
+    label: 'User',
+    badgeVariant: 'default',
+    activeClass: 'border-zinc-500 bg-zinc-700 text-zinc-200',
+  },
+};
 
-const roleLabel = (role: UserRole) =>
-  role === UserRole.SUPER_ADMIN ? 'Super Admin' : 'Mini Admin';
+const ROLE_BUTTONS: UserRole[] = [UserRole.USER, UserRole.MINI_ADMIN, UserRole.SUPER_ADMIN];
 
- const  UsersPage = () => {
+const UsersPage = () => {
   const { data: users = [], isLoading } = useUsers();
   const { mutate: createUser, isPending: isCreating, error: createError, reset: resetMutation } = useCreateUser();
   const { mutate: deleteUser, isPending: isDeleting } = useDeleteUser();
@@ -101,6 +115,7 @@ const roleLabel = (role: UserRole) =>
     all: users.length,
     [UserRole.SUPER_ADMIN]: users.filter((u) => u.role === UserRole.SUPER_ADMIN).length,
     [UserRole.MINI_ADMIN]: users.filter((u) => u.role === UserRole.MINI_ADMIN).length,
+    [UserRole.USER]: users.filter((u) => u.role === UserRole.USER).length,
   };
 
   const apiError = createError
@@ -110,8 +125,9 @@ const roleLabel = (role: UserRole) =>
 
   const TABS: { key: FilterTab; label: string }[] = [
     { key: 'all', label: `All (${counts.all})` },
-    { key: UserRole.SUPER_ADMIN, label: `Super Admin (${counts[UserRole.SUPER_ADMIN]})` },
+    { key: UserRole.SUPER_ADMIN, label: `Admin (${counts[UserRole.SUPER_ADMIN]})` },
     { key: UserRole.MINI_ADMIN, label: `Mini Admin (${counts[UserRole.MINI_ADMIN]})` },
+    { key: UserRole.USER, label: `User (${counts[UserRole.USER]})` },
   ];
 
   return (
@@ -121,7 +137,7 @@ const roleLabel = (role: UserRole) =>
         <div>
           <h1 className="text-2xl font-bold text-foreground">Users</h1>
           <p className="mt-0.5 text-sm text-muted-foreground">
-            Manage admin and mini-admin accounts
+            Manage admin, mini-admin and user accounts
           </p>
         </div>
         <Button onClick={openModal}>+ Add User</Button>
@@ -132,6 +148,7 @@ const roleLabel = (role: UserRole) =>
         {TABS.map(({ key, label }) => (
           <button
             key={key}
+            type="button"
             onClick={() => setFilter(key)}
             className={[
               'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
@@ -191,8 +208,8 @@ const roleLabel = (role: UserRole) =>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{user.email}</td>
                   <td className="px-4 py-3">
-                    <Badge variant={roleBadgeVariant(user.role as UserRole)}>
-                      {roleLabel(user.role as UserRole)}
+                    <Badge variant={(ROLE_CONFIG[user.role as UserRole] ?? ROLE_CONFIG[UserRole.USER]).badgeVariant}>
+                      {(ROLE_CONFIG[user.role as UserRole] ?? ROLE_CONFIG[UserRole.USER]).label}
                     </Badge>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">
@@ -233,9 +250,11 @@ const roleLabel = (role: UserRole) =>
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
           {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm w-full cursor-default"
             onClick={closeModal}
+            aria-label="Close modal"
           />
 
           {/* Panel */}
@@ -244,6 +263,7 @@ const roleLabel = (role: UserRole) =>
             <div className="flex items-center justify-between border-b border-border px-6 py-4">
               <h2 className="text-base font-semibold text-foreground">Add New User</h2>
               <button
+                type="button"
                 onClick={closeModal}
                 className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
               >
@@ -280,23 +300,24 @@ const roleLabel = (role: UserRole) =>
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-foreground">Role</label>
                 <div className="flex gap-2">
-                  {([UserRole.MINI_ADMIN, UserRole.SUPER_ADMIN] as const).map((r) => (
-                    <button
-                      key={r}
-                      type="button"
-                      onClick={() => setValue('role', r, { shouldValidate: true })}
-                      className={[
-                        'flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors',
-                        selectedRole === r
-                          ? r === UserRole.SUPER_ADMIN
-                            ? 'border-blue-500 bg-blue-600/20 text-gray-400'
-                            : 'border-zinc-500 bg-zinc-700 text-zinc-200'
-                          : 'border-border bg-muted text-muted-foreground hover:border-muted-foreground',
-                      ].join(' ')}
-                    >
-                      {r === UserRole.SUPER_ADMIN ? 'Super Admin' : 'Mini Admin'}
-                    </button>
-                  ))}
+                  {ROLE_BUTTONS.map((r) => {
+                    const cfg = ROLE_CONFIG[r];
+                    return (
+                      <button
+                        key={r}
+                        type="button"
+                        onClick={() => setValue('role', r, { shouldValidate: true })}
+                        className={[
+                          'flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors',
+                          selectedRole === r
+                            ? cfg.activeClass
+                            : 'border-border bg-muted text-muted-foreground hover:border-muted-foreground',
+                        ].join(' ')}
+                      >
+                        {cfg.label}
+                      </button>
+                    );
+                  })}
                 </div>
                 {errors.role && (
                   <p className="text-xs text-red-400">{errors.role.message}</p>

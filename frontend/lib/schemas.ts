@@ -87,3 +87,27 @@ export const uploadSchema = z.object({
 });
 
 export type UploadFormData = z.infer<typeof uploadSchema>;
+import { UserRole } from '@/types';
+
+export const createUserSchema = z.object({
+  username: z
+    .string()
+    .min(3, 'Username must be at least 3 characters')
+    .max(30, 'Username must be at most 30 characters')
+    .regex(/^\w+$/, 'Username: letters, numbers, underscores only'),
+
+  email: z.string().email('Please provide a valid email'),
+
+  password: z
+    .string()
+    .min(8, 'Password must be at least 8 characters')
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/,
+      'Must include uppercase, lowercase, number and special character'
+    ),
+
+  role: z.enum([
+    UserRole.MINI_ADMIN,
+    UserRole.USER
+  ]),
+});

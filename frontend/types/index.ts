@@ -136,7 +136,7 @@ export interface RegisterInput {
   username: string;
   email: string;
   password: string;
-  role?: UserRole.SUPER_ADMIN | UserRole.MINI_ADMIN;
+  role?: UserRole;
 }
 
 export interface SignupInput {
