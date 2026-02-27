@@ -11,19 +11,15 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  const email = 'admin@admin.com';
+  const email = 'krish@gmail.com';
   const password = 'Admin@1234';
-
-  const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) {
-    console.log('Super admin already exists, skipping seed.');
-    return;
-  }
 
   const hashedPassword = await bcrypt.hash(password, 12);
 
-  const user = await prisma.user.create({
-    data: {
+  const user = await prisma.user.upsert({
+    where: { email },
+    update: { password: hashedPassword, role: 'SUPER_ADMIN' },
+    create: {
       username: 'superadmin',
       email,
       password: hashedPassword,

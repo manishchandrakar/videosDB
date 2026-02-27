@@ -1,6 +1,6 @@
 'use client';
 
-import { ChangeEvent, forwardRef } from 'react';
+import { ChangeEvent, forwardRef, ReactNode } from 'react';
 import { Input as HeroInput } from '@heroui/react';
 
 interface InputProps {
@@ -18,6 +18,7 @@ interface InputProps {
   required?: boolean;
   name?: string;
   id?: string;
+  endContent?: ReactNode;
   onChange?: (e: ChangeEvent<HTMLInputElement>) => void;
   onBlur?: (e: ChangeEvent<HTMLInputElement>) => void;
   onFocus?: (e: ChangeEvent<HTMLInputElement>) => void;
