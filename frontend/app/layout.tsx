@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import Providers from '@/components/Providers';
 import Navbar from '@/components/custom/Navbar';
+import Footer from '@/components/custom/Footer';
 import ConditionalMain from '@/components/ConditionalMain';
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] });
@@ -13,17 +14,19 @@ export const metadata: Metadata = {
   description: 'Video management platform',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+const RootLayout = ({ children }: { children: React.ReactNode }) =>  {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground min-h-screen`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground min-h-screen flex flex-col`}
       >
         <Providers>
           <Navbar />
           <ConditionalMain>{children}</ConditionalMain>
+          <Footer />
         </Providers>
       </body>
     </html>
   );
 }
+export default RootLayout;

@@ -13,7 +13,7 @@ const ConditionalMain = (props: { children: ReactNode }) => {
   ) {
     return <main className="min-h-screen bg-[#0f0f0f]">{children}</main>;
   }
-  return <main className="mx-auto max-w-7xl px-4 py-6">{children}</main>;
+  return <main className="flex-1 mx-auto max-w-7xl px-4 py-6">{children}</main>;
 };
 
 export default ConditionalMain;

@@ -53,3 +53,12 @@ export const NAV_ITEMS = [
     icon: HiOutlineCloudArrowUp,
   },
 ];
+
+
+export const FOOTER_LINKS = [
+  { label: 'About Us', href: '/about' },
+  { label: 'Contact Us', href: '/contact' },
+  { label: 'Privacy Policy', href: '/privacy-policy' },
+  { label: 'Terms & Conditions', href: '/terms' },
+  { label: 'Disclaimer', href: '/disclaimer' },
+];
