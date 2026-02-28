@@ -99,7 +99,7 @@ const UploadVideoPage = () => {
             {...register("description")}
             placeholder="Describe your video…"
             rows={3}
-            className="rounded-lg border border-zinc-300 bg-zinc-300 px-3 py-2.5 text-sm text-zinc-300 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-ring resize-none"
+            className="rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2.5 text-sm text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-ring resize-none"
           />
           {errors.description && (
             <p className="text-xs text-red-400">{errors.description.message}</p>
@@ -111,7 +111,7 @@ const UploadVideoPage = () => {
           <label className="text-sm font-medium text-zinc-300">Category</label>
           <select
             {...register("category")}
-            className="rounded-lg border border-zinc-700 bg-zinc-200 px-3 py-2.5 text-sm text-zinc-700 focus:outline-none focus:ring-2 focus:ring-ring"
+            className="rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2.5 text-sm text-zinc-200 focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="">Select a category (optional)</option>
             {VIDEO_CATEGORIES.map((c) => (
@@ -145,7 +145,7 @@ const UploadVideoPage = () => {
                   "rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
                   status === s
                     ? "border-blue-500 bg-blue-600/20 text-blue-400"
-                    : "border-zinc-700 bg-zinc-100 text-zinc-400 hover:border-zinc-600",
+                    : "border-zinc-700 bg-zinc-800 text-zinc-400 hover:border-zinc-600",
                 ].join(" ")}
               >
                 {s}
@@ -196,7 +196,7 @@ const UploadVideoPage = () => {
             Thumbnail (optional)
           </label>
           <div
-            className="flex cursor-pointer items-center gap-3 rounded-lg border border-zinc-700 bg-zinc-100 px-4 py-3 text-sm text-zinc-400 hover:border-zinc-600 transition-colors"
+            className="flex cursor-pointer items-center gap-3 rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-3 text-sm text-zinc-400 hover:border-zinc-600 transition-colors"
             onClick={() => thumbRef.current?.click()}
           >
          <HiOutlinePhotograph className="h-4 w-4 shrink-0" />
