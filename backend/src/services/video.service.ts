@@ -3,6 +3,8 @@ import { prisma } from '../config/database';
 import { ApiError } from '../utils/ApiError';
 import { generateUniqueSlug } from '../utils/slugify';
 import { ERROR_MESSAGES, CONSTANTS } from '../constants';
+import { storageService } from './storage.service';
+import { logger } from '../utils/logger';
 import {
   IVideo,
   IVideoCreateInput,
@@ -145,6 +147,20 @@ export class VideoService {
     }
 
     await prisma.video.delete({ where: { id } });
+
+    const deleteFile = async (url: string) => {
+      const parts = url.split('/');
+      const fileName = parts[parts.length - 1];
+      const remoteDir = parts[parts.length - 2];
+      return storageService.deleteFile(remoteDir, fileName).catch((err) => {
+        logger.warn('Failed to delete file from storage', { url, error: err });
+      });
+    };
+
+    await Promise.all([
+      deleteFile(video.videoUrl),
+      ...(video.thumbnailUrl ? [deleteFile(video.thumbnailUrl)] : []),
+    ]);
   }
 
   async toggleStatus(id: string, userId: string, isSuperAdmin: boolean): Promise<IVideo> {

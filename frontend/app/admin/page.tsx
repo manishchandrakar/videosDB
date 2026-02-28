@@ -16,11 +16,10 @@ import Button from "@/components/common/Button";
 import { PublishStatus } from "@/types";
 import useDebounce from "@/utils/utils";
 
-const StatCard = (props: Readonly<{ label: string; value: number | string }>) => {
-  const {
-  label,
-  value,
-} = props
+const StatCard = (
+  props: Readonly<{ label: string; value: number | string }>,
+) => {
+  const { label, value } = props;
   return (
     <div className="rounded-xl border border-border bg-muted p-5">
       <p className="text-sm text-muted-foreground">{label}</p>

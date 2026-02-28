@@ -4,3 +4,4 @@ export * from './IAuth';
 export * from './IRequest';
 export * from './IResponse';
 export * from './IInterserver';
+export * from './IAd';

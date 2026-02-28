@@ -1,8 +1,10 @@
 import { IconType } from "react-icons";
+import { HiOutlineVideoCamera } from "react-icons/hi";
 import {
   HiOutlineHome,
   HiOutlineCloudArrowUp,
   HiOutlineUsers,
+  HiOutlineMegaphone,
 } from "react-icons/hi2";
 
 export interface AdminNavItem {
@@ -30,5 +32,24 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
     label: "Users",
     exact: false,
     icon: HiOutlineUsers,
+  },
+  {
+    href: "/admin/ads",
+    label: "Ads",
+    exact: false,
+    icon: HiOutlineMegaphone,
+  },
+];
+
+export const NAV_ITEMS = [
+  {
+    href: '/mini-admin',
+    label: 'My Videos',
+    icon: HiOutlineVideoCamera,
+  },
+  {
+    href: '/mini-admin/upload',
+    label: 'Upload Video',
+    icon: HiOutlineCloudArrowUp,
   },
 ];

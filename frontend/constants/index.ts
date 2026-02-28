@@ -10,6 +10,8 @@ export const QUERY_KEYS = {
   ADMIN_VIDEOS: ['admin', 'videos'] as const,
   DASHBOARD: ['admin', 'dashboard'] as const,
   USERS: ['admin', 'users'] as const,
+  ADS: ['ads'] as const,
+  ADS_ACTIVE: (placement: string) => ['ads', 'active', placement] as const,
 } as const;
 
 export const DEFAULT_PAGE = 1;

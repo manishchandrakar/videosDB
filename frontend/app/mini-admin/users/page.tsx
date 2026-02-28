@@ -1,18 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useUsers, useCreateUser } from "@/app/hooks/useAuth";
+import { useUsers } from "@/app/hooks/useAuth";
 import { UserRole, UserPublic } from "@/types";
-import Input from "@/components/common/Input";
-import Button from "@/components/common/Button";
 import Badge from "@/components/common/Badge";
 import Spinner from "@/components/common/Spinner";
-import { createUserSchema } from "@/lib/schemas";
-
-type CreateUserForm = z.infer<typeof createUserSchema>;
 
 function TableContent({ users }: { users: UserPublic[] }) {
   if (users.length === 0) {
@@ -104,42 +95,6 @@ function TableContent({ users }: { users: UserPublic[] }) {
 
 const UsersPage = () => {
   const { data: users = [], isLoading, error: usersError } = useUsers();
-  const {
-    mutate: createUser,
-    isPending: isCreating,
-    error: createError,
-    reset: resetMutation,
-  } = useCreateUser();
-  const [modalOpen, setModalOpen] = useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<CreateUserForm>({
-    resolver: zodResolver(createUserSchema),
-  });
-
-  const openModal = () => {
-    reset();
-    resetMutation();
-    setModalOpen(true);
-  };
-  const closeModal = () => {
-    setModalOpen(false);
-    reset();
-    resetMutation();
-  };
-
-  const onSubmit = (data: CreateUserForm) => {
-    createUser({ ...data }, { onSuccess: closeModal });
-  };
-
-  const createApiError = createError
-    ? ((createError as { response?: { data?: { message?: string } } })?.response
-        ?.data?.message ?? "Failed to create user")
-    : null;
 
   const miniAdmins = users.filter((u) => u.role === UserRole.MINI_ADMIN);
 
@@ -170,124 +125,14 @@ const UsersPage = () => {
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Users</h1>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            Mini Admin accounts — {miniAdmins.length} total
-          </p>
-        </div>
-        <Button onClick={openModal}>+ Add User</Button>
+      <div>
+        <h1 className="text-2xl font-bold text-foreground">Users</h1>
+        <p className="mt-0.5 text-sm text-muted-foreground">
+          Mini Admin accounts — {miniAdmins.length} total
+        </p>
       </div>
 
       {renderBody()}
-
-      {/* Add User Modal */}
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          {/* Backdrop */}
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm w-full cursor-default"
-            onClick={closeModal}
-            aria-label="Close modal"
-          />
-
-          {/* Panel */}
-          <div className="relative z-10 w-full max-w-md rounded-2xl border border-border bg-card shadow-2xl">
-            <div className="flex items-center justify-between border-b border-border px-6 py-4">
-              <h2 className="text-base font-semibold text-foreground">
-                Add User
-              </h2>
-              <button
-                type="button"
-                onClick={closeModal}
-                className="rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-              >
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className="flex flex-col gap-4 p-6"
-            >
-              <Input
-                label="Username"
-                placeholder="john_doe"
-                error={errors.username?.message}
-                {...register("username")}
-              />
-              <Input
-                label="Email"
-                type="email"
-                placeholder="john@example.com"
-                error={errors.email?.message}
-                {...register("email")}
-              />
-              <Input
-                label="Password"
-                type="password"
-                placeholder="Min 8 chars, uppercase, number, special char"
-                error={errors.password?.message}
-                {...register("password")}
-              />
-              <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-foreground">
-                  Role
-                </label>
-
-                <select
-                  {...register("role")}
-                  className="rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value={UserRole.MINI_ADMIN}>Mini Admin</option>
-                  <option value={UserRole.USER}>User</option>
-                </select>
-
-                {errors.role && (
-                  <p className="text-xs text-red-400">{errors.role.message}</p>
-                )}
-              </div>
-
-              <p className="text-xs text-muted-foreground">
-                This account will be created as{" "}
-                <span className="font-medium text-foreground">
-                  Mini Admin or User
-                </span>
-                .
-              </p>
-
-              {createApiError && (
-                <p className="rounded-lg border border-red-800 bg-red-900/30 px-3 py-2 text-sm text-red-400">
-                  {createApiError}
-                </p>
-              )}
-
-              <div className="flex gap-3 justify-end pt-2 border-t border-border mt-2">
-                <Button type="button" variant="ghost" onClick={closeModal}>
-                  Cancel
-                </Button>
-                <Button type="submit" loading={isCreating}>
-                  Create User
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

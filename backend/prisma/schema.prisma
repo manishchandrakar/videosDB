@@ -53,3 +53,22 @@ model Video {
   @@index([createdAt])
   @@index([tags])
 }
+
+enum AdStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Advertisement {
+  id            String   @id @default(cuid())
+  title         String
+  thumbnailUrl  String?
+  targetUrl     String
+  showOnHome    Boolean  @default(true)
+  showOnSidebar Boolean  @default(false)
+  status        AdStatus @default(ACTIVE)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([status])
+}

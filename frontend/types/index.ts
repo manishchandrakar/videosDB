@@ -121,6 +121,24 @@ export interface DashboardStats {
   recentUploads: Video[];
 }
 
+// ─── Ads ──────────────────────────────────────────────────────────────────────
+export enum AdStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+}
+
+export interface Advertisement {
+  id: string;
+  title: string;
+  thumbnailUrl: string | null;
+  targetUrl: string;
+  showOnHome: boolean;
+  showOnSidebar: boolean;
+  status: AdStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ─── Users (admin) ────────────────────────────────────────────────────────────
 export interface UserPublic {
   id: string;

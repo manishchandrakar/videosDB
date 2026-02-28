@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import authRoutes from './auth.routes';
 import videoRoutes from './video.routes';
+import adRoutes from './ad.routes';
 import { env } from '../config/env';
 
 const router = Router();
@@ -13,6 +14,7 @@ router.get('/health', (_req, res) => {
 // Mount routes
 router.use('/auth', authRoutes);
 router.use('/videos', videoRoutes);
+router.use('/ads', adRoutes);
 
 // Hidden admin login route (security through obscurity + token auth)
 router.use(`/${env.ADMIN_ROUTE_SECRET}/auth`, authRoutes);

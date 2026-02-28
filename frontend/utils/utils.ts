@@ -127,33 +127,6 @@ export const buildQueryString = <
   return searchParams.toString();
 };
 
-export const getStatusColorClass = (status: ItemStatusEnum): string => {
-  switch (status) {
-    case ItemStatusEnum.COMPLETED:
-      return "bg-lightGreen1 text-green";
-
-    case ItemStatusEnum.CANCELLED:
-      return "bg-lightRed text-red";
-
-    case ItemStatusEnum.PENDING:
-      return "bg-veryLightGray text-themeColor";
-
-    case ItemStatusEnum.CONFIRMED:
-      return "bg-themeColor text-white";
-
-    case ItemStatusEnum.ARRIVED:
-      return "bg-lightGreen text-green";
-
-    case ItemStatusEnum.ONGOING:
-      return "bg-lightRed text-yellow";
-
-    case ItemStatusEnum.ON_HOLD:
-      return "bg-lightGray text-white";
-
-    default:
-      return "bg-lightGray text-slateGray";
-  }
-};
 
 export const formatLabel = (s: ItemStatusEnum | "") => {
   if (s === "") return "All";
